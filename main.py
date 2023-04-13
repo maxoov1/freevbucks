@@ -1,6 +1,8 @@
 import os
+import time
 
 import requests
+import schedule
 from bs4 import BeautifulSoup
 from discord_webhook import DiscordEmbed, DiscordWebhook
 
@@ -9,34 +11,42 @@ DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", None)
 if DISCORD_WEBHOOK_URL is None:
     exit(1)
 
-discord_embed = DiscordEmbed()
 discord_webhook = DiscordWebhook(url=DISCORD_WEBHOOK_URL)
 
-r = requests.get("https://freethevbucks.com/timed-missions")
-soup = BeautifulSoup(r.content, features="lxml")
+def scrape() -> None:
+    discord_embed = DiscordEmbed()
 
-for theater_container in soup.find_all("div", {"class": "col-xs-12"}):
-    theater_name_element = theater_container.find("p", {"class": "jrfont"})
+    r = requests.get("https://freethevbucks.com/timed-missions")
+    soup = BeautifulSoup(r.content, features="lxml")
 
-    theater_name = theater_name_element.text
-    theater_name_element.decompose()
-    
-    mission_string_rewards = []
+    for theater_container in soup.find_all("div", {"class": "col-xs-12"}):
+        theater_name_element = theater_container.find("p", {"class": "jrfont"})
 
-    for mission in theater_container.find_all("p"):
-        mission_text = mission.text.split()
+        theater_name = theater_name_element.text
+        theater_name_element.decompose()
+        
+        mission_string_rewards = []
 
-        mission_power_level = mission_text[0]
-        mission_reward = " ".join(mission_text[1::])
+        for mission in theater_container.find_all("p"):
+            mission_text = mission.text.split()
 
-        mission_string = f"`{mission_power_level:>3}`:zap:: {mission_reward}"
-        mission_string_rewards.append(mission_string)
+            mission_power_level = mission_text[0]
+            mission_reward = " ".join(mission_text[1::])
 
-    discord_embed.add_embed_field(
-        name=theater_name.title(),
-        value="\n".join(mission_string_rewards),
-        inline=False,
-    )
+            mission_string = f"`{mission_power_level:>3}`:zap:: {mission_reward}"
+            mission_string_rewards.append(mission_string)
 
-discord_webhook.add_embed(discord_embed)
-discord_webhook.execute()
+        discord_embed.add_embed_field(
+            name=theater_name.title(),
+            value="\n".join(mission_string_rewards),
+            inline=False,
+        )
+
+    discord_webhook.add_embed(discord_embed)
+    discord_webhook.execute()
+
+if __name__ == "__main__":
+    schedule.every().day.at("03:00").do(scrape)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)

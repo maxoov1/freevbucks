@@ -1,7 +1,7 @@
 FROM python:3.11-alpine
 
 WORKDIR /freevbucks
-RUN pip install --no-cache bs4 lxml requests discord_webhook
+RUN pip install --no-cache bs4 lxml requests discord_webhook schedule
 
 COPY main.py .
 
