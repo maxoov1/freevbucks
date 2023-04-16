@@ -45,6 +45,8 @@ def scrape() -> None:
     discord_webhook.add_embed(discord_embed)
     discord_webhook.execute()
 
+    discord_webhook.remove_embeds()
+
 if __name__ == "__main__":
     schedule.every().day.at("03:00").do(scrape)
     while True:
