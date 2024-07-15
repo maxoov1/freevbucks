@@ -10,7 +10,9 @@ class AlertInformation:
     mission_power_level: int | str
     mission_reward_name: str
 
-    def __init__(self, mission_power_level: int | str, mission_reward_name: str) -> None:
+    def __init__(
+        self, mission_power_level: int | str, mission_reward_name: str
+    ) -> None:
         self.mission_power_level = mission_power_level
         self.mission_reward_name = mission_reward_name
 
@@ -59,7 +61,9 @@ def scrape() -> ScrapeResults:
             mission_reward = " ".join(mission_text[1::])
 
             alert_information = AlertInformation(
-                mission_power_level=mission_power_level, mission_reward_name=mission_reward)
+                mission_power_level=mission_power_level,
+                mission_reward_name=mission_reward,
+            )
             theater_information.add_reward(alert_information=alert_information)
 
         scrape_results.add_theater(theater_information=theater_information)
@@ -75,12 +79,15 @@ class DiscordWebhookAlert:
         embed = DiscordEmbed()
 
         for theater in scrape_results.theaters_information:
-            theater_rewards_string = \
-                "\n".join(f"`{reward.mission_power_level:>3}`:zap:: {reward.mission_reward_name}"
-                    for reward in theater.alerts_information)
+            theater_rewards_string = "\n".join(
+                f"`{reward.mission_power_level:>3}`:zap:: {reward.mission_reward_name}"
+                for reward in theater.alerts_information
+            )
 
             embed.add_embed_field(
-                name=theater.name.title(), value=theater_rewards_string, inline=False,
+                name=theater.name.title(),
+                value=theater_rewards_string,
+                inline=False,
             )
 
         self.webhook.add_embed(embed)
