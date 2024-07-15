@@ -1,8 +1,8 @@
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 
 WORKDIR /freevbucks
-RUN pip install --no-cache bs4 lxml requests discord_webhook schedule pytz
+COPY . .
 
-COPY main.py .
+RUN pip install --no-cache -r requirements.txt
 
 CMD [ "python", "main.py" ]
